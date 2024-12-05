@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             link_afiliado: document.getElementById('linkAfiliado').value,
             template: templateMessage
         };
-
+        console.log('Produto a ser enviado:', product);
         await addProduct(product);
         productForm.reset();
     });
@@ -30,15 +30,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(product)
             });
 
+            const responseData = await response.json();
+            console.log('Resposta do servidor:', responseData);
+
             if (response.ok) {
                 alert('Produto adicionado com sucesso!');
                 await loadProducts();
             } else {
-                alert('Erro ao adicionar produto');
+                console.error('Erro ao adicionar produto:', responseData);
+                alert(`Erro ao adicionar produto: ${responseData.erro || response.statusText}`);
             }
         } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro ao comunicar com o servidor');
+            console.error('Erro de rede:', error);
+            alert('Erro ao comunicar com o servidor: ' + error.message);
         }
     }
 
