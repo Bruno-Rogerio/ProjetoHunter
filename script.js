@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('productForm');
     const productList = document.getElementById('productList');
     const templateMessage = "🔥 Oferta imperdível: {nome} por apenas R$ {preco}! Confira: {link}";
-    const serverUrl = 'http://127.0.0.1:5000'; // Altere para o URL do seu servidor
+    const serverUrl = 'http://192.168.15.4'; // Altere para o URL do seu servidor
 
     // Carregar produtos do servidor
     loadProducts();
