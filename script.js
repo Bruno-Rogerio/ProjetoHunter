@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const product = {
             nome: document.getElementById('nome').value,
             preco: parseFloat(document.getElementById('preco').value),
-            linkAfiliado: document.getElementById('linkAfiliado').value,
+            link_afiliado: document.getElementById('linkAfiliado').value,
             template: templateMessage
         };
 
@@ -51,13 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const message = product.template
                     .replace('{nome}', product.nome)
                     .replace('{preco}', product.preco.toFixed(2))
-                    .replace('{link}', product.linkAfiliado);
+                    .replace('{link}', product.link_afiliado);
 
                 return `
                     <div class="product-item">
                         <h3>${product.nome}</h3>
                         <p>Preço: R$ ${product.preco.toFixed(2)}</p>
-                        <p>Link: <a href="${product.linkAfiliado}" target="_blank">Afiliado</a></p>
+                        <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
                         <p>Mensagem: ${message}</p>
                         <button onclick="deleteProduct('${product._id}')">Deletar</button>
                     </div>
