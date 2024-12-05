@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('productForm');
     const productList = document.getElementById('productList');
     const templateMessage = "🔥 Oferta imperdível: {nome} por apenas R$ {preco}! Confira: {link}";
-    const serverUrl = 'https://projetohunter.pythonanywhere.com';  // Altere para o URL do seu servidor
+     const serverUrl = 'https://projetohunter.pythonanywhere.com';  // Altere para o URL do seu servidor
 
     // Carregar produtos do servidor
     loadProducts();
