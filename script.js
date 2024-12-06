@@ -76,32 +76,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.deleteProduct = async (id) => {
-    console.log('ID recebido para exclusão:', id);  // Registra o ID recebido
-    if (confirm('Tem certeza que deseja deletar este produto?')) {
-        try {
-            // Verifique se o ID é válido (24 caracteres para o MongoDB)
-            if (!id || id.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(id)) {
-                alert('ID inválido para a exclusão');
-                return;
+        console.log('ID recebido para exclusão:', id);  // Verifica o valor do ID no console
+        if (confirm('Tem certeza que deseja deletar este produto?')) {
+            try {
+                // Verifique se o ID é válido (24 caracteres para o MongoDB)
+                if (!id || id.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(id)) {
+                    alert('ID inválido para a exclusão');
+                    return;
+                }
+
+                const response = await fetch(`${serverUrl}/produtos/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const responseData = await response.json();
+
+                if (response.ok) {
+                    alert('Produto deletado com sucesso!');
+                    await loadProducts();
+                } else {
+                    alert('Erro ao deletar produto: ' + (responseData.erro || response.statusText));
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao comunicar com o servidor');
             }
-
-            const response = await fetch(`${serverUrl}/produtos/${id}`, {
-                method: 'DELETE'
-            });
-
-            const responseData = await response.json();
-
-            if (response.ok) {
-                alert('Produto deletado com sucesso!');
-                await loadProducts();
-            } else {
-                alert('Erro ao deletar produto: ' + (responseData.erro || response.statusText));
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-            alert('Erro ao comunicar com o servidor');
         }
-    }
-};
-
+    };
 });
