@@ -1,80 +1,95 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Produtos</title>
-    <style>
-        .product-item {
-            border: 1px solid #ddd;
-            padding: 16px;
-            margin: 8px 0;
-        }
-        .product-item h3 {
-            margin: 0;
-            font-size: 1.5em;
-        }
-        .product-item p {
-            margin: 4px 0;
-        }
-        .product-item button {
-            margin-top: 10px;
-            padding: 8px 16px;
-            background-color: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .product-item button:hover {
-            background-color: darkred;
-        }
-    </style>
-</head>
-<body>
-    <div id="product-list"></div>
+document.addEventListener('DOMContentLoaded', () => {
+    const productForm = document.getElementById('productForm');
+    const productList = document.getElementById('productList');
+    const serverUrl = 'https://projetohunterback.onrender.com'; // URL do backend
 
-    <script>
-        const serverUrl = 'https://projetohunterback.onrender.com'; // Altere para o seu servidor
+    // Função para carregar os produtos na página
+    loadProducts();
 
-        const productList = document.getElementById('product-list');
+    // Evento para criar um novo produto
+    productForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const product = {
+            nome: document.getElementById('nome').value,
+            precoAntigo: parseFloat(document.getElementById('precoAntigo').value),
+            preco: parseFloat(document.getElementById('preco').value),
+            link_afiliado: document.getElementById('linkAfiliado').value
+        };
 
-        async function loadProducts() {
+        console.log('Enviando produto:', product);
+
+        await addProduct(product);
+        productForm.reset(); // Limpa o formulário após envio
+    });
+
+    // Função para adicionar produto
+    async function addProduct(product) {
+        try {
+            const response = await fetch(`${serverUrl}/produtos`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(product)
+            });
+
+            const responseData = await response.json();
+            console.log('Resposta do servidor:', responseData);
+
+            if (response.ok) {
+                alert('Produto adicionado com sucesso!');
+                await loadProducts(); // Atualiza a lista
+            } else {
+                console.error('Erro ao adicionar produto:', responseData);
+                alert(`Erro ao adicionar produto: ${responseData.erro || response.statusText}`);
+            }
+        } catch (error) {
+            console.error('Erro de rede:', error);
+            alert('Erro ao comunicar com o servidor: ' + error.message);
+        }
+    }
+
+    // Função para carregar os produtos
+    async function loadProducts() {
+        try {
+            const response = await fetch(`${serverUrl}/produtos`);
+            const products = await response.json();
+
+            productList.innerHTML = products.map(product => {
+                return `
+                    <div class="product-item">
+                        <h3>${product.nome}</h3>
+                        <p>Preço Antigo: R$ ${product.precoAntigo.toFixed(2)}</p>
+                        <p>Preço Atual: R$ ${product.preco.toFixed(2)}</p>
+                        <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
+                        <button onclick="deleteProduct('${product._id}')">Deletar</button>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
+            productList.innerHTML = '<p>Erro ao carregar produtos</p>';
+        }
+    }
+
+    // Função para deletar produto
+    window.deleteProduct = async (id) => {
+        if (confirm('Tem certeza que deseja deletar este produto?')) {
             try {
-                const response = await fetch(`${serverUrl}/produtos`);
-                const products = await response.json();
-                console.log('Produtos recebidos:', products);  // Verifique o conteúdo recebido do backend
+                const response = await fetch(`${serverUrl}/produtos/${id}`, {
+                    method: 'DELETE'
+                });
 
                 if (response.ok) {
-                    productList.innerHTML = products.map(product => {
-                        // Substituir os placeholders no template
-                        const message = product.template
-                            .replace('{nome}', product.nome)
-                            .replace('{preco_antigo}', product.precoAntigo.toFixed(2))  // Use o nome correto do campo
-                            .replace('{preco_atual}', product.preco.toFixed(2))          // Use o nome correto do campo
-                            .replace('{link}', product.link_afiliado);
-
-                        return `
-                            <div class="product-item">
-                                <h3>${product.nome}</h3>
-                                <p>De: <span style="text-decoration: line-through; color: #999;">R$ ${product.precoAntigo.toFixed(2)}</span></p>
-                                <p>Por: <span style="color: red; font-weight: bold;">R$ ${product.preco.toFixed(2)}</span></p>
-                                <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
-                                <p>Mensagem: ${message}</p>
-                                <button onclick="deleteProduct('${product._id}')">Deletar</button>
-                            </div>
-                        `;
-                    }).join('');
+                    alert('Produto deletado com sucesso!');
+                    await loadProducts();
                 } else {
-                    throw new Error('Erro ao carregar produtos');
+                    alert('Erro ao deletar produto');
                 }
             } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-                productList.innerHTML = '<p>Erro ao carregar produtos</p>';
+                console.error('Erro:', error);
+                alert('Erro ao comunicar com o servidor');
             }
         }
-
-        // Chama a função para carregar os produtos assim que a página for carregada
-        loadProducts();
-    </script>
-</body>
-</html>
+    };
+});
