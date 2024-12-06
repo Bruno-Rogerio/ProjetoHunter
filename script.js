@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const productList = document.getElementById('productList');
     const serverUrl = 'https://projetohunterback.onrender.com'; // URL do backend
 
-    // Função para carregar os produtos na página
+    // Função para carregar os produtos na página oi
     loadProducts();
 
     // Evento para criar um novo produto
