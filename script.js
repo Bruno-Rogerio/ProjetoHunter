@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('productForm');
     const productList = document.getElementById('productList');
-    const templateMessage = "🔥 Oferta imperdível: {nome} por apenas R$ {preco}! Confira: {link}";
+    const templateMessage = "🔥 Oferta imperdível: {nome} de R$ {precoAntigo} por apenas R$ {preco}! Confira: {link}";
     const serverUrl = 'https://projetohunterback.onrender.com'; // URL atualizado do servidor
 
     // Carregar produtos do servidor
@@ -10,14 +10,20 @@ document.addEventListener('DOMContentLoaded', () => {
     productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const nome = document.getElementById('nome').value;
+        const precoAntigo = parseFloat(document.getElementById('precoAntigo').value);
         const preco = parseFloat(document.getElementById('preco').value);
         const linkAfiliado = document.getElementById('linkAfiliado').value;
 
         const product = {
             nome: nome,
+            precoAntigo: precoAntigo,
             preco: preco,
             link_afiliado: linkAfiliado,
-            template: templateMessage.replace('{nome}', nome).replace('{preco}', preco.toFixed(2)).replace('{link}', linkAfiliado)
+            template: templateMessage
+                .replace('{nome}', nome)
+                .replace('{precoAntigo}', precoAntigo.toFixed(2))
+                .replace('{preco}', preco.toFixed(2))
+                .replace('{link}', linkAfiliado)
         };
 
         console.log('Produto a ser enviado:', product);
@@ -59,13 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
             productList.innerHTML = products.map(product => {
                 const message = product.template
                     .replace('{nome}', product.nome)
+                    .replace('{precoAntigo}', product.precoAntigo.toFixed(2))
                     .replace('{preco}', product.preco.toFixed(2))
                     .replace('{link}', product.link_afiliado);
 
                 return `
                     <div class="product-item">
                         <h3>${product.nome}</h3>
-                        <p>Preço: R$ ${product.preco.toFixed(2)}</p>
+                        <p>Preço Antigo: R$ ${product.precoAntigo.toFixed(2)}</p>
+                        <p>Preço Atual: R$ ${product.preco.toFixed(2)}</p>
                         <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
                         <p>Mensagem: ${message}</p>
                         <button onclick="deleteProduct('${product._id}')">Deletar</button>
