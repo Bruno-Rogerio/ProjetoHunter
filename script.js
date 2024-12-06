@@ -78,6 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.deleteProduct = async (id) => {
         if (confirm('Tem certeza que deseja deletar este produto?')) {
             try {
+                // Verifique se o ID é válido
+                if (!id || id.length !== 24) {
+                    alert('ID inválido para a exclusão');
+                    return;
+                }
+
                 const response = await fetch(`${serverUrl}/produtos/${id}`, {
                     method: 'DELETE'
                 });
