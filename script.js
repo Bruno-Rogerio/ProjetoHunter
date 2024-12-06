@@ -34,7 +34,7 @@
     <div id="product-list"></div>
 
     <script>
-        const serverUrl = 'http://localhost:5000'; // Altere para o seu servidor
+        const serverUrl = 'https://projetohunterback.onrender.com'; // Altere para o seu servidor
 
         const productList = document.getElementById('product-list');
 
