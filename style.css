@@ -144,3 +144,68 @@ button:hover {
     }
 }
 
+/* Estilo para a estrutura do formulário */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+/* Estilo dos campos do formulário */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+label {
+    font-weight: bold;
+}
+
+input {
+    padding: 8px;
+    font-size: 14px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Estilo da lista de produtos */
+#productList {
+    margin-top: 20px;
+}
+
+.product-item {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+/* Estilo para os preços */
+.price-old {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 16px;
+}
+
+.price-new {
+    color: red;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Estilo para o link */
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
