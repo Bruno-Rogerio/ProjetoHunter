@@ -52,7 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${serverUrl}/produtos`);
             const products = await response.json();
             
+            console.log('Produtos recebidos:', products); // Adicionado para verificar a lista de produtos
+
             productList.innerHTML = products.map(product => {
+                console.log('Produto sendo processado:', product); // Verifica os dados de cada produto
                 const message = product.template
                     .replace('{nome}', product.nome)
                     .replace('{preco}', product.preco.toFixed(2))
