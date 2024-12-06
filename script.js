@@ -78,8 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.deleteProduct = async (id) => {
         if (confirm('Tem certeza que deseja deletar este produto?')) {
             try {
-                // Verifique se o ID é válido
-                if (!id || id.length !== 24) {
+                // Verifique se o ID é válido (24 caracteres para o MongoDB)
+                if (!id || id.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(id)) {
                     alert('ID inválido para a exclusão');
                     return;
                 }
