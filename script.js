@@ -61,16 +61,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Exibir a lista de produtos
+    // Exibir a lista de produtos (com os campos certos e layout modelado)
     function renderProducts(filteredProducts) {
-        productList.innerHTML = filteredProducts.map(product => `
-            <div class="product-item">
-                <h3>${product.nome}</h3>
-                <p>De: <span class="price-old">R$ ${product.precoAntigo.toFixed(2)}</span></p>
-                <p>Por: <span class="price-new">R$ ${product.preco.toFixed(2)}</span></p>
-                <a href="${product.link_afiliado}" target="_blank">Comprar agora</a>
-            </div>
-        `).join('');
+        productList.innerHTML = filteredProducts.map(product => {
+            // Calcula a economia
+            const precoAntigo = product.precoAntigo.toFixed(2);
+            const precoAtual = product.preco.toFixed(2);
+            const economia = (product.precoAntigo - product.preco).toFixed(2);
+
+            // Template ajustado ao formato exigido
+            return `
+                <div class="product-item">
+                    <h3>🔥 OFERTA IMPERDÍVEL!</h3>
+                    <p>${product.nome}</p>
+                    <p>💰 De: R$ ${precoAntigo}</p>
+                    <p>💥 Por apenas: R$ ${precoAtual}</p>
+                    <p>Economize R$ ${economia}!</p>
+                    <p>🛒 Compre agora pelo link abaixo:</p>
+                    <p>${product.link_afiliado}</p>
+                </div>
+            `;
+        }).join('');
     }
 
     // Filtros e busca
