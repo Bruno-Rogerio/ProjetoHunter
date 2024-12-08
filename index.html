@@ -3,31 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Produtos</title>
+    <title>Gestão de Produtos</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Cadastro de Produtos</h1>
-        <form id="productForm">
-            <label for="nome">Nome do Produto:</label>
-            <input type="text" id="nome" name="nome" placeholder="Nome do Produto" required>
+        <!-- Menu de Navegação -->
+        <nav>
+            <button id="showForm">Cadastro de Produtos</button>
+            <button id="showMarketplace">Marketplace</button>
+        </nav>
+
+        <!-- Seção de Cadastro -->
+        <div id="formSection">
+            <h1>Cadastro de Produtos</h1>
+            <form id="productForm">
+                <label for="nome">Nome do Produto:</label>
+                <input type="text" id="nome" name="nome" placeholder="Nome do Produto" required>
+                
+                <label for="precoAntigo">Preço Antigo:</label>
+                <input type="number" id="precoAntigo" name="precoAntigo" placeholder="Preço Antigo" step="0.01" required>
+                
+                <label for="preco">Preço Atual:</label>
+                <input type="number" id="preco" name="preco" placeholder="Preço Atual" step="0.01" required>
+                
+                <label for="linkAfiliado">Link Afiliado:</label>
+                <input type="url" id="linkAfiliado" name="linkAfiliado" placeholder="Link Afiliado" required>
+                
+                <button type="submit">Adicionar Produto</button>
+            </form>
+        </div>
+
+        <!-- Seção do Marketplace -->
+        <div id="marketplaceSection" style="display: none;">
+            <h1>Marketplace</h1>
+            <!-- Barra de Busca e Filtros -->
+            <div class="filters">
+                <input type="text" id="searchBar" placeholder="Buscar Produto..." />
+                <select id="sortFilter">
+                    <option value="maisRecente">Mais Recentes</option>
+                    <option value="menorPreco">Menor Preço</option>
+                    <option value="maiorPreco">Maior Preço</option>
+                </select>
+            </div>
             
-            <label for="precoAntigo">Preço Antigo:</label>
-            <input type="number" id="precoAntigo" name="precoAntigo" placeholder="Preço Antigo" step="0.01" required>
-            
-            <label for="preco">Preço Atual:</label>
-            <input type="number" id="preco" name="preco" placeholder="Preço Atual" step="0.01" required>
-            
-            <label for="linkAfiliado">Link Afiliado:</label>
-            <input type="url" id="linkAfiliado" name="linkAfiliado" placeholder="Link Afiliado" required>
-            
-            <button type="submit">Adicionar Produto</button>
-        </form>
-        
-        <h2>Produtos Cadastrados</h2>
-        <div id="productList"></div>
+            <!-- Lista de Produtos -->
+            <div id="productList"></div>
+        </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
