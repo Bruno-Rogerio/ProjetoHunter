@@ -67,7 +67,7 @@ nav button:hover {
 
 .product-item {
     background-color: #f9f9f9;
-    padding: 10px;
+    padding: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
     margin-bottom: 10px;
@@ -83,7 +83,7 @@ nav button:hover {
 .price-new {
     color: red;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
 }
 
 /* Estilo para o link */
@@ -103,7 +103,7 @@ a:hover {
 }
 
 .product-item p {
-    margin: 5px 0;
+    margin: 10px 0; /* Adiciona espaço entre os parágrafos */
 }
 
 .product-item a {
@@ -203,15 +203,15 @@ input {
     color: #ff5722;
     font-size: 20px;
     text-transform: uppercase;
+    font-weight: bold;
 }
 
 .product-item p {
-    margin: 5px 0;
+    margin: 10px 0;
     line-height: 1.4;
     font-size: 16px;
 }
 
-/* Link de afiliado puro (não estilizado como hyperlink) */
 .product-item p:last-child {
     color: #000;
     word-break: break-word;
