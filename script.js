@@ -72,11 +72,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Template ajustado ao formato exigido
             return `
                 <div class="product-item">
-                    <h3>🔥 OFERTA IMPERDÍVEL!</h3>
-                    <p>${product.nome}</p>
-                    <p>💰 De: R$ ${precoAntigo}</p>
-                    <p>💥 Por apenas: R$ ${precoAtual}</p>
-                    <p>Economize R$ ${economia}!</p>
+                    <h3><strong>🔥 OFERTA IMPERDÍVEL!</strong></h3>
+                    <p><strong>${product.nome}</strong></p>
+                    <p>💰 De: <span class="price-old">R$ ${precoAntigo}</span></p>
+                    <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
+                    <p><strong>Economize R$ ${economia}!</strong></p>
                     <p>🛒 Compre agora pelo link abaixo:</p>
                     <p>${product.link_afiliado}</p>
                 </div>
