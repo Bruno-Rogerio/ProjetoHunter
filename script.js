@@ -91,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (sortOption === 'maiorPreco') {
             sortedProducts.sort((a, b) => b.preco - a.preco);
         } else if (sortOption === 'maisRecente') {
-            // Ordenar por data (assumindo que existe um campo 'createdAt')
             sortedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         }
 
