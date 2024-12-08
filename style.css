@@ -1,3 +1,4 @@
+/* Estilo Geral */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -15,9 +16,11 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
+/* Formulário */
 form {
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
 input, textarea, button {
@@ -36,67 +39,61 @@ button:hover {
     background-color: #45a049;
 }
 
-#productList {
-    margin-top: 20px;
-}
-
-.product-item {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-}
-
-/* Estilos existentes */
-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 20px;
-    background-color: #f4f4f4;
-}
-
-.container {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-form {
+/* Navegação */
+nav {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
-input, textarea, button {
-    margin-bottom: 10px;
-    padding: 10px;
-}
-
-button {
-    background-color: #4CAF50;
+nav button {
+    padding: 10px 20px;
+    margin: 0 5px;
+    background-color: #007BFF;
     color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-button:hover {
-    background-color: #45a049;
+nav button:hover {
+    background-color: #0056b3;
 }
 
+/* Estilo da lista de produtos */
 #productList {
     margin-top: 20px;
 }
 
 .product-item {
     background-color: #f9f9f9;
-    border: 1px solid #ddd;
     padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
     margin-bottom: 10px;
-    border-radius: 4px;
+}
+
+/* Estilo para os preços */
+.price-old {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 16px;
+}
+
+.price-new {
+    color: red;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Estilo para o link */
+a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 /* Novas regras CSS */
@@ -174,100 +171,6 @@ input {
     border-radius: 4px;
 }
 
-/* Estilo da lista de produtos */
-#productList {
-    margin-top: 20px;
-}
-
-.product-item {
-    background-color: #f9f9f9;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 10px;
-}
-
-/* Estilo para os preços */
-.price-old {
-    text-decoration: line-through;
-    color: #999;
-    font-size: 16px;
-}
-
-.price-new {
-    color: red;
-    font-weight: bold;
-    font-size: 18px;
-}
-
-/* Estilo para o link */
-a {
-    color: #0066cc;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* Estilo Geral */
-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 20px;
-    background-color: #f4f4f4;
-}
-
-.container {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-/* Navegação */
-nav {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-nav button {
-    padding: 10px 20px;
-    margin: 0 5px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-nav button:hover {
-    background-color: #0056b3;
-}
-
-/* Formulário */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-label {
-    font-weight: bold;
-}
-
-input {
-    padding: 8px;
-    font-size: 14px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
 /* Marketplace */
 .filters {
     display: flex;
@@ -289,32 +192,48 @@ input {
 /* Lista de Produtos */
 .product-item {
     background-color: #f9f9f9;
-    padding: 10px;
+    padding: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
     margin-bottom: 10px;
 }
 
 .product-item h3 {
-    margin: 0 0 10px 0;
+    margin: 0;
+    color: #ff5722;
+    font-size: 20px;
+    text-transform: uppercase;
 }
 
-.price-old {
-    text-decoration: line-through;
-    color: #999;
+.product-item p {
+    margin: 5px 0;
+    line-height: 1.4;
+    font-size: 16px;
 }
 
-.price-new {
-    color: red;
-    font-weight: bold;
+/* Link de afiliado puro (não estilizado como hyperlink) */
+.product-item p:last-child {
+    color: #000;
+    word-break: break-word;
+    font-family: monospace; /* Exibe o link com um estilo diferente */
 }
 
-a {
-    color: #0066cc;
-    text-decoration: none;
-}
+/* Para responsividade */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
 
-a:hover {
-    text-decoration: underline;
-}
+    .filters {
+        flex-direction: column;
+        gap: 10px;
+    }
 
+    #searchBar {
+        margin: 0;
+    }
+
+    #sortFilter {
+        width: 100%;
+    }
+}
