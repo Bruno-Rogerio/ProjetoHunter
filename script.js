@@ -43,10 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 productForm.reset();
                 loadProducts(); // Atualiza a lista de produtos
             } else {
-                alert('Erro ao adicionar produto.');
+                const responseData = await response.json();
+                console.error('Erro ao adicionar produto:', responseData);
+                alert(`Erro ao adicionar produto: ${responseData.erro || response.statusText}`);
             }
         } catch (error) {
-            alert('Erro ao comunicar com o servidor.');
+            console.error('Erro de rede:', error);
+            alert('Erro ao comunicar com o servidor: ' + error.message);
         }
     });
 
@@ -57,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             products = await response.json(); // Atualiza o array local
             renderProducts(products);
         } catch (error) {
+            console.error('Erro ao carregar produtos:', error);
             productList.innerHTML = '<p>Erro ao carregar produtos.</p>';
         }
     }
@@ -78,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
                     <p><strong>Economize R$ ${economia}!</strong></p>
                     <p>🛒 Compre agora pelo link abaixo:</p>
-                    <p><a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
+                    <p>${product.link_afiliado}</p>
                 </div>
             `;
         }).join('');
