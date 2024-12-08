@@ -1,109 +1,100 @@
 document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('productForm');
     const productList = document.getElementById('productList');
-    const templateMessage = "🔥 Oferta imperdível: {nome} por apenas R$ {preco}! Confira: {link}";
-    const serverUrl = 'https://projetohunterback.onrender.com';  // URL atualizado do servidor
+    const formSection = document.getElementById('formSection');
+    const marketplaceSection = document.getElementById('marketplaceSection');
+    const searchBar = document.getElementById('searchBar');
+    const sortFilter = document.getElementById('sortFilter');
+    const serverUrl = 'https://projetohunterback.onrender.com';
 
-    // Carregar produtos do servidor
-    loadProducts();
+    let products = []; // Array local para armazenar os produtos
 
+    // Alternar entre as seções do menu
+    document.getElementById('showForm').addEventListener('click', () => {
+        formSection.style.display = 'block';
+        marketplaceSection.style.display = 'none';
+    });
+
+    document.getElementById('showMarketplace').addEventListener('click', () => {
+        formSection.style.display = 'none';
+        marketplaceSection.style.display = 'block';
+        loadProducts(); // Atualizar a lista de produtos ao acessar o marketplace
+    });
+
+    // Adicionar Produto
     productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const product = {
             nome: document.getElementById('nome').value,
-            precoAntigo: parseFloat(document.getElementById('precoAntigo').value), // Ajustado para precoAntigo
+            precoAntigo: parseFloat(document.getElementById('precoAntigo').value),
             preco: parseFloat(document.getElementById('preco').value),
             link_afiliado: document.getElementById('linkAfiliado').value,
-            template: templateMessage
         };
-        console.log('Produto a ser enviado:', product);
-        await addProduct(product);
-        productForm.reset();
-    });
 
-    async function addProduct(product) {
         try {
             const response = await fetch(`${serverUrl}/produtos`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(product)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product),
             });
-
-            const responseData = await response.json();
-            console.log('Resposta do servidor:', responseData);
 
             if (response.ok) {
                 alert('Produto adicionado com sucesso!');
-                await loadProducts();
+                productForm.reset();
+                loadProducts(); // Atualiza a lista de produtos
             } else {
-                console.error('Erro ao adicionar produto:', responseData);
-                alert(`Erro ao adicionar produto: ${responseData.erro || response.statusText}`);
+                alert('Erro ao adicionar produto.');
             }
         } catch (error) {
-            console.error('Erro de rede:', error);
-            alert('Erro ao comunicar com o servidor: ' + error.message);
+            alert('Erro ao comunicar com o servidor.');
         }
-    }
+    });
 
+    // Carregar Produtos
     async function loadProducts() {
         try {
             const response = await fetch(`${serverUrl}/produtos`);
-            const products = await response.json();
-            
-            console.log('Produtos recebidos:', products); // Adicionado para verificar a lista de produtos
-
-            productList.innerHTML = products.map(product => {
-                console.log('Produto sendo processado:', product); // Verifica os dados de cada produto
-                const message = product.template
-                    .replace('{nome}', product.nome)
-                    .replace('{preco}', product.preco.toFixed(2))
-                    .replace('{link}', product.link_afiliado);
-
-                return `
-                    <div class="product-item">
-                        <h3>${product.nome}</h3>
-                        <p>De: <span class="price-old">R$ ${product.precoAntigo.toFixed(2)}</span></p>
-                        <p>Por: <span class="price-new">R$ ${product.preco.toFixed(2)}</span></p>
-                        <p>🔥 Oferta imperdível: ${product.nome} por apenas R$ ${product.preco.toFixed(2)}! </p>
-                        <p>Compre Agora!!: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
-                        <button onclick="deleteProduct('${product._id}')">Deletar</button>
-                    </div>
-                `;
-            }).join('');
+            products = await response.json(); // Atualiza o array local
+            renderProducts(products);
         } catch (error) {
-            console.error('Erro ao carregar produtos:', error);
-            productList.innerHTML = '<p>Erro ao carregar produtos</p>';
+            productList.innerHTML = '<p>Erro ao carregar produtos.</p>';
         }
     }
 
-    window.deleteProduct = async (id) => {
-        console.log('ID recebido para exclusão:', id);  // Verifica o valor do ID no console
-        if (confirm('Tem certeza que deseja deletar este produto?')) {
-            try {
-                // Verifique se o ID é válido (24 caracteres para o MongoDB)
-                if (!id || id.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(id)) {
-                    alert('ID inválido para a exclusão');
-                    return;
-                }
+    // Exibir a lista de produtos
+    function renderProducts(filteredProducts) {
+        productList.innerHTML = filteredProducts.map(product => `
+            <div class="product-item">
+                <h3>${product.nome}</h3>
+                <p>De: <span class="price-old">R$ ${product.precoAntigo.toFixed(2)}</span></p>
+                <p>Por: <span class="price-new">R$ ${product.preco.toFixed(2)}</span></p>
+                <a href="${product.link_afiliado}" target="_blank">Comprar agora</a>
+            </div>
+        `).join('');
+    }
 
-                const response = await fetch(`${serverUrl}/produtos/${id}`, {
-                    method: 'DELETE'
-                });
+    // Filtros e busca
+    searchBar.addEventListener('input', () => {
+        const searchQuery = searchBar.value.toLowerCase();
+        const filtered = products.filter(product => 
+            product.nome.toLowerCase().includes(searchQuery)
+        );
+        renderProducts(filtered);
+    });
 
-                const responseData = await response.json();
+    sortFilter.addEventListener('change', () => {
+        const sortOption = sortFilter.value;
+        let sortedProducts = [...products];
 
-                if (response.ok) {
-                    alert('Produto deletado com sucesso!');
-                    await loadProducts();
-                } else {
-                    alert('Erro ao deletar produto: ' + (responseData.erro || response.statusText));
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao comunicar com o servidor');
-            }
+        if (sortOption === 'menorPreco') {
+            sortedProducts.sort((a, b) => a.preco - b.preco);
+        } else if (sortOption === 'maiorPreco') {
+            sortedProducts.sort((a, b) => b.preco - a.preco);
+        } else if (sortOption === 'maisRecente') {
+            // Ordenar por data (assumindo que existe um campo 'createdAt')
+            sortedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         }
-    };
+
+        renderProducts(sortedProducts);
+    });
 });
