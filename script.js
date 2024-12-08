@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             precoAntigo: parseFloat(document.getElementById('precoAntigo').value),
             preco: parseFloat(document.getElementById('preco').value),
             link_afiliado: document.getElementById('linkAfiliado').value,
+            template: "🔥 OFERTA IMPERDÍVEL!\n\n{nome}\n\n💰 De: R$ {precoAntigo}\n\n💥 Por apenas: R$ {preco}\n\nEconomize R$ {economia}!\n\n🛒 Compre agora pelo link abaixo:\n\n{link_afiliado}"
         };
 
         try {
@@ -82,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
                     <p><strong>Economize R$ ${economia}!</strong></p>
                     <p>🛒 Compre agora pelo link abaixo:</p>
-                    <p>${product.link_afiliado}</p>
+                    <p><a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
                 </div>
             `;
         }).join('');
