@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
                     <p><strong>Economize R$ ${economia}!</strong></p>
                     <p>🛒 Compre agora pelo link abaixo:</p>
-                    <p><a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
+                    <p>${product.link_afiliado}</p>
                 </div>
             `;
         }).join('');
