@@ -109,25 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const html = filteredProducts.map(product => {
-            const precoAntigo = product.precoAntigo.toFixed(2);
-            const precoAtual = product.preco.toFixed(2);
-            const economia = (product.precoAntigo - product.preco).toFixed(2);
+            const precoAntigo = product.precoAntigo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const precoAtual = product.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const economia = (product.precoAntigo - product.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            const template = `
-                🔥 OFERTA IMPERDÍVEL!
-
-                ${product.nome}
-
-                💰 De: R$ ${precoAntigo}
-
-                💥 Por apenas: R$ ${precoAtual}
-
-                Economize R$ ${economia}!
-
-                🛒 Compre agora pelo link abaixo:
-
-                Link: ${product.link_afiliado}
-            `;
+            const template = `🔥 OFERTA IMPERDÍVEL!\n\n${product.nome}\n\n💰 De: ${precoAntigo}\n💥 Por apenas: ${precoAtual}\n\nEconomize ${economia}!\n\n🛒 Compre agora pelo link abaixo:\n\nLink: ${product.link_afiliado}`;
 
             return `
                 <div class="product-item">
