@@ -92,48 +92,30 @@ async function loadProducts() {
 }
 
 
-    // Função para exibir a lista de produtos organizados por categoria
-function renderProducts(filteredProducts) {
-    if (filteredProducts.length === 0) {
-        categoriesContainer.innerHTML = '<p>Nenhum produto encontrado.</p>';
-        return;
+     // Exibir a lista de produtos (com os campos certos e layout modelado)
+    function renderProducts(filteredProducts) {
+        productList.innerHTML = filteredProducts.map(product => {
+            // Calcula a economia
+            const precoAntigo = product.precoAntigo.toFixed(2);
+            const precoAtual = product.preco.toFixed(2);
+            const economia = (product.precoAntigo - product.preco).toFixed(2);
+
+            // Template ajustado ao formato exigido
+            return `
+                <div class="product-item">
+                    <h3><strong>🔥 OFERTA IMPERDÍVEL!</strong></h3>
+                    <p><strong>${product.nome}</strong></p>
+                    <p>💰 De: <span class="price-old">R$ ${precoAntigo}</span></p>
+                    <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
+                    <p><strong>Economize R$ ${economia}!</strong></p>
+                    <p>🛒 Compre agora pelo link abaixo:</p>
+                    <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
+
+                </div>
+            `;
+        }).join('');
     }
 
-    // Obtenha as categorias exclusivas dos produtos
-    const categories = [...new Set(filteredProducts.map(product => product.categoria))];
-
-    // Renderizar as categorias e os produtos dentro de cada uma
-    categoriesContainer.innerHTML = categories.map(category => {
-        const categoryProducts = filteredProducts.filter(product => product.categoria === category);
-        return `
-            <div class="category">
-                <h2>${category}</h2>
-                <div class="products">
-                    ${categoryProducts.map(product => {
-                        if (!product.precoAntigo || !product.preco || !product.nome || !product.link_afiliado) {
-                            return ''; // Ignorar produtos com informações faltando
-                        }
-                        const precoAntigo = product.precoAntigo.toFixed(2);
-                        const precoAtual = product.preco.toFixed(2);
-                        const economia = (product.precoAntigo - product.preco).toFixed(2);
-
-                        return `
-                            <div class="product-item">
-                                <h3><strong>🔥 OFERTA IMPERDÍVEL!</strong></h3>
-                                <p><strong>${product.nome}</strong></p>
-                                <p>💰 De: <span class="price-old">R$ ${precoAntigo}</span></p>
-                                <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
-                                <p><strong>Economize R$ ${economia}!</strong></p>
-                                <p>🛒 Compre agora pelo link abaixo:</p>
-                                <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    }).join('');
-}
 
 
     // Filtros e busca
