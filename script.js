@@ -118,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return `
                 <div class="product-item">
                     <pre>${template}</pre> <!-- Renderiza o template diretamente -->
-                    <a href="${product.link_afiliado}" target="_blank">Comprar Agora</a>
                 </div>
             `;
         }).join('');
