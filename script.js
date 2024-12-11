@@ -67,24 +67,31 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Erro ao comunicar com o servidor: ' + error.message);
         }
     });
-
+    
+    // Carregar produtos
+    
     async function loadProducts() {
-    feedbackMessage.textContent = 'Carregando produtos...';
-    feedbackMessage.style.display = 'block';
     try {
+        feedbackMessage.textContent = 'Carregando produtos...'; // Isso acontece antes do carregamento real.
+        feedbackMessage.style.display = 'block'; // Mostra a mensagem de carregamento.
+        
         const response = await fetch(`${serverUrl}/produtos`);
+        
         if (!response.ok) {
             throw new Error('Erro ao carregar produtos: ' + response.statusText);
         }
+        
         products = await response.json(); // Atualiza o array local
-        renderProducts(products);  // Garanta que isso seja chamado após carregar os produtos
-        feedbackMessage.style.display = 'none';
+        renderProducts(products);  // Renderiza após o sucesso no carregamento.
+        
+        feedbackMessage.style.display = 'none'; // Oculta a mensagem de carregamento.
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
-        productList.innerHTML = '<p>Erro ao carregar produtos.</p>';
-        feedbackMessage.style.display = 'none';
+        feedbackMessage.textContent = 'Erro ao carregar produtos.';
+        feedbackMessage.style.display = 'block';
     }
 }
+
     // Exibir a lista de produtos organizados por categoria
     function renderProducts(filteredProducts) {
         if (filteredProducts.length === 0) {
