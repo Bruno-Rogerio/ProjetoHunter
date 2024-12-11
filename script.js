@@ -29,9 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const precoAntigo = parseFloat(document.getElementById('precoAntigo').value);
         const preco = parseFloat(document.getElementById('preco').value);
         const linkAfiliado = document.getElementById('linkAfiliado').value.trim();
+        const categoria = document.getElementById('categoria').value.trim();
 
         // Validações simples
-        if (!nome || !linkAfiliado || isNaN(precoAntigo) || isNaN(preco) || precoAntigo <= 0 || preco <= 0 || preco >= precoAntigo) {
+        if (!nome || !linkAfiliado || !categoria || isNaN(precoAntigo) || isNaN(preco) || precoAntigo <= 0 || preco <= 0 || preco >= precoAntigo) {
             alert('Por favor, preencha todos os campos corretamente. O preço atual deve ser menor que o preço antigo.');
             return;
         }
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             precoAntigo,
             preco,
             link_afiliado: linkAfiliado,
+            categoria,
             template: "🔥 OFERTA IMPERDÍVEL!\n\n{nome}\n\n💰 De: R$ {precoAntigo}\n\n💥 Por apenas: R$ {preco}\n\nEconomize R$ {economia}!\n\n🛒 Compre agora pelo link abaixo:\n\n{link_afiliado}"
         };
 
@@ -85,27 +87,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Exibir a lista de produtos (com os campos certos e layout modelado)
+    // Exibir a lista de produtos organizados por categoria
     function renderProducts(filteredProducts) {
         if (filteredProducts.length === 0) {
             productList.innerHTML = '<p>Nenhum produto encontrado.</p>';
             return;
         }
 
-        productList.innerHTML = filteredProducts.map(product => {
-            const precoAntigo = product.precoAntigo.toFixed(2);
-            const precoAtual = product.preco.toFixed(2);
-            const economia = (product.precoAntigo - product.preco).toFixed(2);
-
+        const categories = [...new Set(filteredProducts.map(product => product.categoria))];
+        productList.innerHTML = categories.map(category => {
+            const categoryProducts = filteredProducts.filter(product => product.categoria === category);
             return `
-                <div class="product-item">
-                    <h3><strong>🔥 OFERTA IMPERDÍVEL!</strong></h3>
-                    <p><strong>${product.nome}</strong></p>
-                    <p>💰 De: <span class="price-old">R$ ${precoAntigo}</span></p>
-                    <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
-                    <p><strong>Economize R$ ${economia}!</strong></p>
-                    <p>🛒 Compre agora pelo link abaixo:</p>
-                    <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
+                <div class="category">
+                    <h2>${category}</h2>
+                    <div class="products">
+                        ${categoryProducts.map(product => {
+                            const precoAntigo = product.precoAntigo.toFixed(2);
+                            const precoAtual = product.preco.toFixed(2);
+                            const economia = (product.precoAntigo - product.preco).toFixed(2);
+
+                            return `
+                                <div class="product-item">
+                                    <h3><strong>🔥 OFERTA IMPERDÍVEL!</strong></h3>
+                                    <p><strong>${product.nome}</strong></p>
+                                    <p>💰 De: <span class="price-old">R$ ${precoAntigo}</span></p>
+                                    <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
+                                    <p><strong>Economize R$ ${economia}!</strong></p>
+                                    <p>🛒 Compre agora pelo link abaixo:</p>
+                                    <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
             `;
         }).join('');
