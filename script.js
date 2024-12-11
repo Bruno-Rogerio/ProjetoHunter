@@ -1,151 +1,76 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const productForm = document.getElementById('productForm');
-    const formSection = document.getElementById('formSection');
-    const marketplaceSection = document.getElementById('marketplaceSection');
-    const searchBar = document.getElementById('searchBar');
-    const sortFilter = document.getElementById('sortFilter');
-    const productList = document.getElementById('productList'); // Div para os produtos
-    const feedbackMessage = document.getElementById('feedbackMessage'); // Adicione no HTML, se necessário
-    const serverUrl = 'https://projetohunterback.onrender.com';
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Produtos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Menu de Navegação -->
+        <nav>
+            <button id="showForm">Cadastro de Produtos</button>
+            <button id="showMarketplace">Marketplace</button>
+        </nav>
 
-    let products = []; // Array para armazenamento local dos produtos
+        <!-- Seção de Cadastro -->
+        <div id="formSection">
+            <h1>Cadastro de Produtos</h1>
+            <form id="productForm">
+                <!-- Campos do formulário -->
+                <label for="nome">Nome do Produto:</label>
+                <input type="text" id="nome" name="nome" placeholder="Nome do Produto" required>
+                
+                <label for="precoAntigo">Preço Antigo:</label>
+                <input type="number" id="precoAntigo" name="precoAntigo" placeholder="Preço Antigo" step="0.01" required>
+                
+                <label for="preco">Preço Atual:</label>
+                <input type="number" id="preco" name="preco" placeholder="Preço Atual" step="0.01" required>
+                
+                <label for="linkAfiliado">Link Afiliado:</label>
+                <input type="url" id="linkAfiliado" name="linkAfiliado" placeholder="Link Afiliado" required>
+                
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" name="categoria" required>
+                    <option value="" disabled selected>Selecione uma Categoria</option>
+                    <option value="Eletrônicos">Eletrônicos</option>
+                    <option value="Moda">Moda</option>
+                    <option value="Casa e Cozinha">Casa e Cozinha</option>
+                    <option value="Beleza">Beleza</option>
+                    <option value="Jóias">Jóias</option>
+                    <option value="Outros">Outros</option>
+                </select>
+                
+                <button type="submit">Adicionar Produto</button>
+            </form>
+        </div>
 
-    // Alternar entre Cadastro e Marketplace
-    document.getElementById('showForm').addEventListener('click', () => {
-        formSection.style.display = 'block';  // Mostra a seção de cadastro
-        marketplaceSection.style.display = 'none';  // Esconde o marketplace
-    });
-
-    document.getElementById('showMarketplace').addEventListener('click', () => {
-        formSection.style.display = 'none';  // Esconde a seção de cadastro
-        marketplaceSection.style.display = 'block';  // Mostra o marketplace
-        loadProducts(); // Atualiza os produtos toda vez que o marketplace for aberto
-    });
-
-    // Adicionar Produto (submit do formulário)
-    productForm.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Previne recarregamento da página
-        const nome = document.getElementById('nome').value.trim();
-        const precoAntigo = parseFloat(document.getElementById('precoAntigo').value);
-        const preco = parseFloat(document.getElementById('preco').value);
-        const linkAfiliado = document.getElementById('linkAfiliado').value.trim();
-        const categoria = document.getElementById('categoria').value.trim();
-
-        // Validação básica
-        if (!nome || isNaN(precoAntigo) || isNaN(preco) || precoAntigo <= preco || !categoria || !linkAfiliado) {
-            alert('Preencha todos os campos corretamente.');
-            return;
-        }
-
-        // Objeto com dados do produto
-        const product = {
-            nome,
-            precoAntigo,
-            preco,
-            link_afiliado: linkAfiliado,
-            categoria,
-            template: `🔥 OFERTA IMPERDÍVEL!\n\n${nome}\n\n💰 De: R$${precoAntigo}\n💥 Por apenas: R$${preco}\n\nEconomize R$${(precoAntigo - preco).toFixed(2)}!\n\n🛒 Compre agora: ${linkAfiliado}`
-        };
-
-        try {
-            const response = await fetch(`${serverUrl}/produtos`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(product)
-            });
-
-            if (response.ok) {
-                alert('Produto cadastrado com sucesso!');
-                productForm.reset(); // Limpa o formulário
-                loadProducts(); // Atualiza lista no marketplace
-            } else {
-                const { erro } = await response.json();
-                console.error('Erro ao adicionar produto:', erro);
-                alert(`Erro ao adicionar produto: ${erro}`);
-            }
-        } catch (error) {
-            console.error('Erro de rede:', error);
-            alert('Erro ao comunicar com o servidor.');
-        }
-    });
-
-    // Carregar Produtos
-    async function loadProducts() {
-        try {
-            productList.innerHTML = '<p>Carregando produtos...</p>'; // Placeholder enquanto carrega
-            const response = await fetch(`${serverUrl}/produtos`);
+        <!-- Seção do Marketplace -->
+        <div id="marketplaceSection" style="display: none;">
+            <h1>Marketplace</h1>
+            <!-- Mensagem de feedback (erro ou status) -->
+            <div id="feedbackMessage" style="color: red; margin-bottom: 10px;"></div>
             
-            if (!response.ok) {
-                throw new Error('Falha ao carregar produtos do servidor.');
-            }
+            <!-- Barra de Busca e Filtros -->
+            <div class="filters">
+                <input type="text" id="searchBar" placeholder="Buscar Produto..." />
+                <select id="sortFilter">
+                    <option value="maisRecente">Mais Recentes</option>
+                    <option value="menorPreco">Menor Preço</option>
+                    <option value="maiorPreco">Maior Preço</option>
+                </select>
+                <!-- Dropdown de Categorias -->
+                <select id="categoryFilter">
+                    <option value="Todas">Todas as Categorias</option>
+                </select>
+            </div>
+            
+            <!-- Lista de Produtos -->
+            <div id="productList"></div>
+        </div>
+    </div>
 
-            products = await response.json(); // Atualiza array local
-            renderProducts(products);
-        } catch (error) {
-            console.error('Erro ao carregar produtos:', error);
-            productList.innerHTML = '<p>Erro ao carregar produtos. Tente novamente mais tarde.</p>';
-        }
-    }
-
-    // Renderizar Produtos
-    function renderProducts(filteredProducts) {
-        if (filteredProducts.length === 0) {
-            productList.innerHTML = '<p>Nenhum produto encontrado!</p>';
-            return;
-        }
-
-        const html = filteredProducts.map(product => {
-            const precoAntigo = product.precoAntigo.toFixed(2);
-            const precoAtual = product.preco.toFixed(2);
-            const economia = (product.precoAntigo - product.preco).toFixed(2);
-
-            const template = `
-                🔥 OFERTA IMPERDÍVEL!
-
-                ${product.nome}
-
-                💰 De: R$ ${precoAntigo}
-
-                💥 Por apenas: R$ ${precoAtual}
-
-                Economize R$ ${economia}!
-
-                🛒 Compre agora pelo link abaixo:
-
-                Link: ${product.link_afiliado}
-            `;
-
-            return `
-                <div class="product-item">
-                    <pre>${template}</pre> <!-- Renderiza o template diretamente -->
-                </div>
-            `;
-        }).join('');
-
-        productList.innerHTML = html; // Insere os produtos no DOM
-    }
-
-    // Filtros e Buscas
-    searchBar.addEventListener('input', () => {
-        const searchQuery = searchBar.value.toLowerCase();
-        const filtered = products.filter(product => 
-            product.nome.toLowerCase().includes(searchQuery)
-        );
-        renderProducts(filtered);
-    });
-
-    sortFilter.addEventListener('change', () => {
-        const sortOption = sortFilter.value;
-        const sorted = [...products];
-
-        if (sortOption === 'menorPreco') {
-            sorted.sort((a, b) => a.preco - b.preco);
-        } else if (sortOption === 'maiorPreco') {
-            sorted.sort((a, b) => b.preco - a.preco);
-        } else if (sortOption === 'maisRecente') {
-            sorted.sort((a, b) => new Date(b.data_cadastro) - new Date(a.data_cadastro));
-        }
-
-        renderProducts(sorted);
-    });
-});
+    <script src="script.js"></script>
+</body>
+</html>
