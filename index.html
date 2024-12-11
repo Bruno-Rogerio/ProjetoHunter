@@ -5,6 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Produtos</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilo para os itens do produto */
+        .product-item {
+            border: 1px solid #ddd; /* Borda ao redor do item */
+            border-radius: 5px; /* Bordas arredondadas */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para destaque */
+            margin: 10px 0; /* Margem entre os itens */
+            padding: 15px; /* Espaçamento interno */
+            background-color: #fff; /* Fundo branco */
+        }
+
+        /* Estilo para o contêiner de produtos */
+        #productList {
+            display: flex;
+            flex-direction: column; /* Alinha os itens em coluna */
+            gap: 15px; /* Espaçamento entre os itens */
+        }
+
+        /* Estilo para o texto do template */
+        .product-item pre {
+            font-family: 'Arial', sans-serif; /* Fonte legível */
+            font-size: 14px; /* Tamanho da fonte */
+            line-height: 1.5; /* Altura da linha para melhor legibilidade */
+            white-space: pre-wrap; /* Mantém a formatação de quebra de linha */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
