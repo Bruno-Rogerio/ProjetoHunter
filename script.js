@@ -69,12 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Carregar produtos
-    
-    async function loadProducts() {
+async function loadProducts() {
     try {
-        feedbackMessage.textContent = 'Carregando produtos...'; // Isso acontece antes do carregamento real.
-        feedbackMessage.style.display = 'block'; // Mostra a mensagem de carregamento.
-        
+        feedbackMessage.textContent = 'Carregando produtos...';
+        feedbackMessage.style.display = 'block'; // Exibe a mensagem de carregamento.
+
         const response = await fetch(`${serverUrl}/produtos`);
         
         if (!response.ok) {
@@ -87,10 +86,11 @@ document.addEventListener('DOMContentLoaded', () => {
         feedbackMessage.style.display = 'none'; // Oculta a mensagem de carregamento.
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
-        feedbackMessage.textContent = 'Erro ao carregar produtos.';
+        feedbackMessage.textContent = 'Erro ao carregar produtos. Verifique a conexão com o servidor ou tente novamente mais tarde.';
         feedbackMessage.style.display = 'block';
     }
 }
+
 
     // Função para exibir a lista de produtos organizados por categoria
 function renderProducts(filteredProducts) {
