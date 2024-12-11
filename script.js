@@ -1,206 +1,132 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from pymongo import MongoClient
-from bson import ObjectId
-from datetime import datetime
-from config import MONGO_URI, DB_NAME
-import os
+document.addEventListener('DOMContentLoaded', () => {
+    const productForm = document.getElementById('productForm');
+    const formSection = document.getElementById('formSection');
+    const marketplaceSection = document.getElementById('marketplaceSection');
+    const searchBar = document.getElementById('searchBar');
+    const sortFilter = document.getElementById('sortFilter');
+    const categoriesContainer = document.getElementById('categoriesContainer');
+    const feedbackMessage = document.getElementById('feedbackMessage');
+    const productList = document.getElementById('productList'); // Certifique-se de que exista no HTML.
+    const serverUrl = 'https://projetohunterback.onrender.com';
 
-# Configurações iniciais
-app = Flask(__name__)
-CORS(app)
+    let products = []; // Armazena os produtos carregados.
 
-# Conexão com MongoDB
-client = MongoClient(MONGO_URI)
-db = client[DB_NAME]
-produtos_collection = db.produtos
+    // Alternar entre seções
+    document.getElementById('showForm').addEventListener('click', () => {
+        formSection.style.display = 'block';
+        marketplaceSection.style.display = 'none';
+    });
 
-# Função auxiliar para converter ObjectId em string e categorizar o produto
-def serialize_produto(produto):
-    produto['_id'] = str(produto['_id'])
-    produto['categoria'] = produto.get('categoria', 'Geral')
-    produto['data_cadastro'] = produto.get('data_cadastro', datetime.utcnow()).isoformat()  # Garante formato correto
-    return produto
+    document.getElementById('showMarketplace').addEventListener('click', () => {
+        formSection.style.display = 'none';
+        marketplaceSection.style.display = 'block';
+        loadProducts(); // Atualiza os produtos ao acessar o marketplace.
+    });
 
-# Rota para criar produto
-@app.route('/produtos', methods=['POST'])
-def criar_produto():
-    dados = request.json
-    if not dados:
-        return jsonify({'erro': 'Nenhum dado recebido'}), 400
-        
-    campos_obrigatorios = ['nome', 'preco', 'precoAntigo', 'link_afiliado', 'template', 'categoria']
-    for campo in campos_obrigatorios:
-        if campo not in dados:
-            return jsonify({'erro': f'Campo obrigatório ausente: {campo}'}), 400
+    // Adicionar Produto
+    productForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nome = document.getElementById('nome').value.trim();
+        const precoAntigo = parseFloat(document.getElementById('precoAntigo').value);
+        const preco = parseFloat(document.getElementById('preco').value);
+        const linkAfiliado = document.getElementById('linkAfiliado').value.trim();
+        const categoria = document.getElementById('categoria').value.trim();
 
-    produto = {
-        'nome': dados['nome'],
-        'preco': float(dados['preco']),
-        'precoAntigo': float(dados['precoAntigo']),
-        'link_afiliado': dados['link_afiliado'],
-        'template': dados['template'],
-        'categoria': dados.get('categoria', 'Geral'),
-        'ativo': True,
-        'data_cadastro': datetime.utcnow()
+        if (!nome || !linkAfiliado || !categoria || isNaN(precoAntigo) || isNaN(preco) || precoAntigo <= preco) {
+            alert('Preencha os campos corretamente.');
+            return;
+        }
+
+        const product = {
+            nome,
+            precoAntigo,
+            preco,
+            link_afiliado: linkAfiliado,
+            categoria,
+            template: "🔥 OFERTA IMPERDÍVEL!\n\n{nome}\n\n💰 De: R$ {precoAntigo}\n💥 Por apenas: R$ {preco}\n\nEconomize R$ {economia}!\n\n🛒 Link: {link_afiliado}"
+        };
+
+        try {
+            const response = await fetch(`${serverUrl}/produtos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(product),
+            });
+
+            const responseData = await response.json();
+            if (response.ok) {
+                alert('Produto cadastrado!');
+                productForm.reset();
+                loadProducts();
+            } else {
+                alert(`Erro: ${responseData.erro}`);
+            }
+        } catch (error) {
+            console.error('Erro ao salvar produto:', error);
+        }
+    });
+
+    // Carregar Produtos
+    async function loadProducts() {
+        try {
+            feedbackMessage.textContent = 'Carregando produtos...';
+            feedbackMessage.style.display = 'block';
+
+            const response = await fetch(`${serverUrl}/produtos`);
+            if (!response.ok) throw new Error('Erro ao carregar produtos');
+
+            products = await response.json();
+            renderProducts(products);
+
+            feedbackMessage.style.display = 'none';
+        } catch (error) {
+            console.error('Erro:', error);
+            feedbackMessage.textContent = 'Erro ao carregar produtos.';
+        }
     }
-    resultado = produtos_collection.insert_one(produto)
-    produto['_id'] = str(resultado.inserted_id)
-    return jsonify({'mensagem': 'Produto cadastrado com sucesso', 'produto': produto}), 201
 
-# Rota para listar produtos
-@app.route('/produtos', methods=['GET'])
-def listar_produtos():
-    try:
-        produtos = list(produtos_collection.find({'ativo': True}))  # Apenas produtos ativos
-        produtos_formatados = [serialize_produto(produto) for produto in produtos]
-        return jsonify(produtos_formatados)
-    except Exception as e:
-        print(f"Erro ao listar produtos: {e}")  # Log para debug
-        return jsonify({'erro': 'Erro interno ao listar produtos'}), 500
+    // Renderizar Produtos
+    function renderProducts(filteredProducts) {
+        const html = filteredProducts.map(product => {
+            const precoAntigo = product.precoAntigo.toFixed(2);
+            const preco = product.preco.toFixed(2);
+            const economia = (product.precoAntigo - product.preco).toFixed(2);
 
-# Rota para atualizar produto
-@app.route('/produtos/<id>', methods=['PUT'])
-def atualizar_produto(id):
-    try:
-        dados = request.json
-        resultado = produtos_collection.update_one(
-            {'_id': ObjectId(id)},
-            {'$set': {
-                'nome': dados['nome'],
-                'preco': float(dados['preco']),
-                'precoAntigo': float(dados['precoAntigo']),
-                'link_afiliado': dados['link_afiliado'],
-                'template': dados['template'],
-                'categoria': dados.get('categoria', 'Geral'),
-                'data_atualizacao': datetime.utcnow()
-            }}
-        )
-        if resultado.modified_count:
-            return jsonify({'mensagem': 'Produto atualizado com sucesso'})
-        return jsonify({'mensagem': 'Produto não encontrado'}), 404
-    except Exception as e:
-        print(f"Erro ao atualizar produto: {e}")  # Log para debug
-        return jsonify({'erro': 'Erro interno ao atualizar o produto'}), 500
+            return `
+                <div class="product-item">
+                    <h3>🔥 ${product.nome}</h3>
+                    <p>De: <s>R$ ${precoAntigo}</s></p>
+                    <p>Por: <strong>R$ ${preco}</strong></p>
+                    <p>Economize R$ ${economia}</p>
+                    <a href="${product.link_afiliado}" target="_blank">Comprar Agora</a>
+                </div>
+            `;
+        }).join('');
 
-# Rota para deletar produto (soft delete - apenas inativa)
-@app.route('/produtos/<id>', methods=['DELETE'])
-def deletar_produto(id):
-    try:
-        resultado = produtos_collection.update_one(
-            {'_id': ObjectId(id)},
-            {'$set': {'ativo': False}}  # Soft delete
-        )
-        if resultado.modified_count > 0:
-            return jsonify({'mensagem': 'Produto excluído com sucesso!'})
-        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
-    except Exception as e:
-        print(f"Erro ao deletar produto: {e}")  # Log para debug
-        return jsonify({'erro': 'Erro interno ao excluir o produto'}), 500
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from pymongo import MongoClient
-from bson import ObjectId
-from datetime import datetime
-from config import MONGO_URI, DB_NAME
-import os
-
-# Configurações iniciais
-app = Flask(__name__)
-CORS(app)
-
-# Conexão com MongoDB
-client = MongoClient(MONGO_URI)
-db = client[DB_NAME]
-produtos_collection = db.produtos
-
-# Função auxiliar para converter ObjectId em string e categorizar o produto
-def serialize_produto(produto):
-    produto['_id'] = str(produto['_id'])
-    produto['categoria'] = produto.get('categoria', 'Geral')
-    produto['data_cadastro'] = produto.get('data_cadastro', datetime.utcnow()).isoformat()  # Garante formato correto
-    return produto
-
-# Rota para criar produto
-@app.route('/produtos', methods=['POST'])
-def criar_produto():
-    dados = request.json
-    if not dados:
-        return jsonify({'erro': 'Nenhum dado recebido'}), 400
-        
-    campos_obrigatorios = ['nome', 'preco', 'precoAntigo', 'link_afiliado', 'template', 'categoria']
-    for campo in campos_obrigatorios:
-        if campo not in dados:
-            return jsonify({'erro': f'Campo obrigatório ausente: {campo}'}), 400
-
-    produto = {
-        'nome': dados['nome'],
-        'preco': float(dados['preco']),
-        'precoAntigo': float(dados['precoAntigo']),
-        'link_afiliado': dados['link_afiliado'],
-        'template': dados['template'],
-        'categoria': dados.get('categoria', 'Geral'),
-        'ativo': True,
-        'data_cadastro': datetime.utcnow()
+        productList.innerHTML = html;
     }
-    resultado = produtos_collection.insert_one(produto)
-    produto['_id'] = str(resultado.inserted_id)
-    return jsonify({'mensagem': 'Produto cadastrado com sucesso', 'produto': produto}), 201
 
-# Rota para listar produtos
-@app.route('/produtos', methods=['GET'])
-def listar_produtos():
-    try:
-        produtos = list(produtos_collection.find({'ativo': True}))  # Apenas produtos ativos
-        produtos_formatados = [serialize_produto(produto) for produto in produtos]
-        return jsonify(produtos_formatados)
-    except Exception as e:
-        print(f"Erro ao listar produtos: {e}")  # Log para debug
-        return jsonify({'erro': 'Erro interno ao listar produtos'}), 500
+    // Filtros e Buscas
+    searchBar.addEventListener('input', () => {
+        const searchQuery = searchBar.value.toLowerCase();
+        const filtered = products.filter(product => 
+            product.nome.toLowerCase().includes(searchQuery)
+        );
+        renderProducts(filtered);
+    });
 
-# Rota para atualizar produto
-@app.route('/produtos/<id>', methods=['PUT'])
-def atualizar_produto(id):
-    try:
-        dados = request.json
-        resultado = produtos_collection.update_one(
-            {'_id': ObjectId(id)},
-            {'$set': {
-                'nome': dados['nome'],
-                'preco': float(dados['preco']),
-                'precoAntigo': float(dados['precoAntigo']),
-                'link_afiliado': dados['link_afiliado'],
-                'template': dados['template'],
-                'categoria': dados.get('categoria', 'Geral'),
-                'data_atualizacao': datetime.utcnow()
-            }}
-        )
-        if resultado.modified_count:
-            return jsonify({'mensagem': 'Produto atualizado com sucesso'})
-        return jsonify({'mensagem': 'Produto não encontrado'}), 404
-    except Exception as e:
-        print(f"Erro ao atualizar produto: {e}")  # Log para debug
-        return jsonify({'erro': 'Erro interno ao atualizar o produto'}), 500
+    sortFilter.addEventListener('change', () => {
+        const sortOption = sortFilter.value;
+        const sorted = [...products];
 
-# Rota para deletar produto (soft delete - apenas inativa)
-@app.route('/produtos/<id>', methods=['DELETE'])
-def deletar_produto(id):
-    try:
-        resultado = produtos_collection.update_one(
-            {'_id': ObjectId(id)},
-            {'$set': {'ativo': False}}  # Soft delete
-        )
-        if resultado.modified_count > 0:
-            return jsonify({'mensagem': 'Produto excluído com sucesso!'})
-        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
-    except Exception as e:
-        print(f"Erro ao deletar produto: {e}")  # Log para debug
-        return jsonify({'erro': 'Erro interno ao excluir o produto'}), 500
+        if (sortOption === 'menorPreco') {
+            sorted.sort((a, b) => a.preco - b.preco);
+        } else if (sortOption === 'maiorPreco') {
+            sorted.sort((a, b) => b.preco - a.preco);
+        } else if (sortOption === 'maisRecente') {
+            sorted.sort((a, b) => new Date(b.data_cadastro) - new Date(a.data_cadastro));
+        }
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+        renderProducts(sorted);
+    });
+});
