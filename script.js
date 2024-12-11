@@ -1,144 +1,206 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const productForm = document.getElementById('productForm');
-    const formSection = document.getElementById('formSection');
-    const marketplaceSection = document.getElementById('marketplaceSection');
-    const searchBar = document.getElementById('searchBar');
-    const sortFilter = document.getElementById('sortFilter');
-    const categoriesContainer = document.getElementById('categoriesContainer');
-    const feedbackMessage = document.getElementById('feedbackMessage'); // Mensagem de feedback
-    const serverUrl = 'https://projetohunterback.onrender.com';
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from pymongo import MongoClient
+from bson import ObjectId
+from datetime import datetime
+from config import MONGO_URI, DB_NAME
+import os
 
-    let products = []; // Array local para armazenar os produtos
+# Configurações iniciais
+app = Flask(__name__)
+CORS(app)
 
-    // Alternar entre as seções do menu
-    document.getElementById('showForm').addEventListener('click', () => {
-        formSection.style.display = 'block';
-        marketplaceSection.style.display = 'none';
-    });
+# Conexão com MongoDB
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
+produtos_collection = db.produtos
 
-    document.getElementById('showMarketplace').addEventListener('click', () => {
-        formSection.style.display = 'none';
-        marketplaceSection.style.display = 'block';
-        loadProducts(); // Atualizar a lista de produtos ao acessar o marketplace
-    });
+# Função auxiliar para converter ObjectId em string e categorizar o produto
+def serialize_produto(produto):
+    produto['_id'] = str(produto['_id'])
+    produto['categoria'] = produto.get('categoria', 'Geral')
+    produto['data_cadastro'] = produto.get('data_cadastro', datetime.utcnow()).isoformat()  # Garante formato correto
+    return produto
 
-    // Adicionar Produto
-    productForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const nome = document.getElementById('nome').value.trim();
-        const precoAntigo = parseFloat(document.getElementById('precoAntigo').value);
-        const preco = parseFloat(document.getElementById('preco').value);
-        const linkAfiliado = document.getElementById('linkAfiliado').value.trim();
-        const categoria = document.getElementById('categoria').value.trim();
-
-        // Validações simples
-        if (!nome || !linkAfiliado || !categoria || isNaN(precoAntigo) || isNaN(preco) || precoAntigo <= 0 || preco <= 0 || preco >= precoAntigo) {
-            alert('Por favor, preencha todos os campos corretamente. O preço atual deve ser menor que o preço antigo.');
-            return;
-        }
-
-        const product = {
-            nome,
-            precoAntigo,
-            preco,
-            link_afiliado: linkAfiliado,
-            categoria,
-            template: "🔥 OFERTA IMPERDÍVEL!\n\n{nome}\n\n💰 De: R$ {precoAntigo}\n\n💥 Por apenas: R$ {preco}\n\nEconomize R$ {economia}!\n\n🛒 Compre agora pelo link abaixo:\n\n{link_afiliado}"
-        };
-
-        try {
-            const response = await fetch(`${serverUrl}/produtos`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(product),
-            });
-
-            if (response.ok) {
-                alert('Produto adicionado com sucesso!');
-                productForm.reset();
-                loadProducts(); // Atualiza a lista de produtos
-            } else {
-                const responseData = await response.json();
-                console.error('Erro ao adicionar produto:', responseData);
-                alert(`Erro ao adicionar produto: ${responseData.erro || response.statusText}`);
-            }
-        } catch (error) {
-            console.error('Erro de rede:', error);
-            alert('Erro ao comunicar com o servidor: ' + error.message);
-        }
-    });
-    
-    // Carregar produtos
-async function loadProducts() {
-    try {
-        feedbackMessage.textContent = 'Carregando produtos...';
-        feedbackMessage.style.display = 'block'; // Exibe a mensagem de carregamento.
-
-        const response = await fetch(`${serverUrl}/produtos`);
+# Rota para criar produto
+@app.route('/produtos', methods=['POST'])
+def criar_produto():
+    dados = request.json
+    if not dados:
+        return jsonify({'erro': 'Nenhum dado recebido'}), 400
         
-        if (!response.ok) {
-            throw new Error('Erro ao carregar produtos: ' + response.statusText);
-        }
-        
-        products = await response.json(); // Atualiza o array local
-        renderProducts(products);  // Renderiza após o sucesso no carregamento.
-        
-        feedbackMessage.style.display = 'none'; // Oculta a mensagem de carregamento.
-    } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
-        feedbackMessage.textContent = 'Erro ao carregar produtos. Verifique a conexão com o servidor ou tente novamente mais tarde.';
-        feedbackMessage.style.display = 'block';
+    campos_obrigatorios = ['nome', 'preco', 'precoAntigo', 'link_afiliado', 'template', 'categoria']
+    for campo in campos_obrigatorios:
+        if campo not in dados:
+            return jsonify({'erro': f'Campo obrigatório ausente: {campo}'}), 400
+
+    produto = {
+        'nome': dados['nome'],
+        'preco': float(dados['preco']),
+        'precoAntigo': float(dados['precoAntigo']),
+        'link_afiliado': dados['link_afiliado'],
+        'template': dados['template'],
+        'categoria': dados.get('categoria', 'Geral'),
+        'ativo': True,
+        'data_cadastro': datetime.utcnow()
     }
-}
+    resultado = produtos_collection.insert_one(produto)
+    produto['_id'] = str(resultado.inserted_id)
+    return jsonify({'mensagem': 'Produto cadastrado com sucesso', 'produto': produto}), 201
 
+# Rota para listar produtos
+@app.route('/produtos', methods=['GET'])
+def listar_produtos():
+    try:
+        produtos = list(produtos_collection.find({'ativo': True}))  # Apenas produtos ativos
+        produtos_formatados = [serialize_produto(produto) for produto in produtos]
+        return jsonify(produtos_formatados)
+    except Exception as e:
+        print(f"Erro ao listar produtos: {e}")  # Log para debug
+        return jsonify({'erro': 'Erro interno ao listar produtos'}), 500
 
-     // Exibir a lista de produtos (com os campos certos e layout modelado)
-    function renderProducts(filteredProducts) {
-        productList.innerHTML = filteredProducts.map(product => {
-            // Calcula a economia
-            const precoAntigo = product.precoAntigo.toFixed(2);
-            const precoAtual = product.preco.toFixed(2);
-            const economia = (product.precoAntigo - product.preco).toFixed(2);
+# Rota para atualizar produto
+@app.route('/produtos/<id>', methods=['PUT'])
+def atualizar_produto(id):
+    try:
+        dados = request.json
+        resultado = produtos_collection.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': {
+                'nome': dados['nome'],
+                'preco': float(dados['preco']),
+                'precoAntigo': float(dados['precoAntigo']),
+                'link_afiliado': dados['link_afiliado'],
+                'template': dados['template'],
+                'categoria': dados.get('categoria', 'Geral'),
+                'data_atualizacao': datetime.utcnow()
+            }}
+        )
+        if resultado.modified_count:
+            return jsonify({'mensagem': 'Produto atualizado com sucesso'})
+        return jsonify({'mensagem': 'Produto não encontrado'}), 404
+    except Exception as e:
+        print(f"Erro ao atualizar produto: {e}")  # Log para debug
+        return jsonify({'erro': 'Erro interno ao atualizar o produto'}), 500
 
-            // Template ajustado ao formato exigido
-            return `
-                <div class="product-item">
-                    <h3><strong>🔥 OFERTA IMPERDÍVEL!</strong></h3>
-                    <p><strong>${product.nome}</strong></p>
-                    <p>💰 De: <span class="price-old">R$ ${precoAntigo}</span></p>
-                    <p>💥 Por apenas: <span class="price-new">R$ ${precoAtual}</span></p>
-                    <p><strong>Economize R$ ${economia}!</strong></p>
-                    <p>🛒 Compre agora pelo link abaixo:</p>
-                    <p>Link: <a href="${product.link_afiliado}" target="_blank">${product.link_afiliado}</a></p>
+# Rota para deletar produto (soft delete - apenas inativa)
+@app.route('/produtos/<id>', methods=['DELETE'])
+def deletar_produto(id):
+    try:
+        resultado = produtos_collection.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': {'ativo': False}}  # Soft delete
+        )
+        if resultado.modified_count > 0:
+            return jsonify({'mensagem': 'Produto excluído com sucesso!'})
+        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
+    except Exception as e:
+        print(f"Erro ao deletar produto: {e}")  # Log para debug
+        return jsonify({'erro': 'Erro interno ao excluir o produto'}), 500
 
-                </div>
-            `;
-        }).join('');
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from pymongo import MongoClient
+from bson import ObjectId
+from datetime import datetime
+from config import MONGO_URI, DB_NAME
+import os
+
+# Configurações iniciais
+app = Flask(__name__)
+CORS(app)
+
+# Conexão com MongoDB
+client = MongoClient(MONGO_URI)
+db = client[DB_NAME]
+produtos_collection = db.produtos
+
+# Função auxiliar para converter ObjectId em string e categorizar o produto
+def serialize_produto(produto):
+    produto['_id'] = str(produto['_id'])
+    produto['categoria'] = produto.get('categoria', 'Geral')
+    produto['data_cadastro'] = produto.get('data_cadastro', datetime.utcnow()).isoformat()  # Garante formato correto
+    return produto
+
+# Rota para criar produto
+@app.route('/produtos', methods=['POST'])
+def criar_produto():
+    dados = request.json
+    if not dados:
+        return jsonify({'erro': 'Nenhum dado recebido'}), 400
+        
+    campos_obrigatorios = ['nome', 'preco', 'precoAntigo', 'link_afiliado', 'template', 'categoria']
+    for campo in campos_obrigatorios:
+        if campo not in dados:
+            return jsonify({'erro': f'Campo obrigatório ausente: {campo}'}), 400
+
+    produto = {
+        'nome': dados['nome'],
+        'preco': float(dados['preco']),
+        'precoAntigo': float(dados['precoAntigo']),
+        'link_afiliado': dados['link_afiliado'],
+        'template': dados['template'],
+        'categoria': dados.get('categoria', 'Geral'),
+        'ativo': True,
+        'data_cadastro': datetime.utcnow()
     }
+    resultado = produtos_collection.insert_one(produto)
+    produto['_id'] = str(resultado.inserted_id)
+    return jsonify({'mensagem': 'Produto cadastrado com sucesso', 'produto': produto}), 201
 
+# Rota para listar produtos
+@app.route('/produtos', methods=['GET'])
+def listar_produtos():
+    try:
+        produtos = list(produtos_collection.find({'ativo': True}))  # Apenas produtos ativos
+        produtos_formatados = [serialize_produto(produto) for produto in produtos]
+        return jsonify(produtos_formatados)
+    except Exception as e:
+        print(f"Erro ao listar produtos: {e}")  # Log para debug
+        return jsonify({'erro': 'Erro interno ao listar produtos'}), 500
 
+# Rota para atualizar produto
+@app.route('/produtos/<id>', methods=['PUT'])
+def atualizar_produto(id):
+    try:
+        dados = request.json
+        resultado = produtos_collection.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': {
+                'nome': dados['nome'],
+                'preco': float(dados['preco']),
+                'precoAntigo': float(dados['precoAntigo']),
+                'link_afiliado': dados['link_afiliado'],
+                'template': dados['template'],
+                'categoria': dados.get('categoria', 'Geral'),
+                'data_atualizacao': datetime.utcnow()
+            }}
+        )
+        if resultado.modified_count:
+            return jsonify({'mensagem': 'Produto atualizado com sucesso'})
+        return jsonify({'mensagem': 'Produto não encontrado'}), 404
+    except Exception as e:
+        print(f"Erro ao atualizar produto: {e}")  # Log para debug
+        return jsonify({'erro': 'Erro interno ao atualizar o produto'}), 500
 
-    // Filtros e busca
-    searchBar.addEventListener('input', () => {
-        const searchQuery = searchBar.value.toLowerCase();
-        const filtered = products.filter(product => 
-            product.nome.toLowerCase().includes(searchQuery)
-        );
-        renderProducts(filtered);
-    });
+# Rota para deletar produto (soft delete - apenas inativa)
+@app.route('/produtos/<id>', methods=['DELETE'])
+def deletar_produto(id):
+    try:
+        resultado = produtos_collection.update_one(
+            {'_id': ObjectId(id)},
+            {'$set': {'ativo': False}}  # Soft delete
+        )
+        if resultado.modified_count > 0:
+            return jsonify({'mensagem': 'Produto excluído com sucesso!'})
+        return jsonify({'mensagem': 'Produto não encontrado!'}), 404
+    except Exception as e:
+        print(f"Erro ao deletar produto: {e}")  # Log para debug
+        return jsonify({'erro': 'Erro interno ao excluir o produto'}), 500
 
-    sortFilter.addEventListener('change', () => {
-        const sortOption = sortFilter.value;
-        let sortedProducts = [...products];
-
-        if (sortOption === 'menorPreco') {
-            sortedProducts.sort((a, b) => a.preco - b.preco);
-        } else if (sortOption === 'maiorPreco') {
-            sortedProducts.sort((a, b) => b.preco - a.preco);
-        } else if (sortOption === 'maisRecente') {
-            sortedProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        }
-
-        renderProducts(sortedProducts);
-    });
-});
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
