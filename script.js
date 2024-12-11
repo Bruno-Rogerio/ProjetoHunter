@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             preco,
             link_afiliado: linkAfiliado,
             categoria,
-            template: `🔥 OFERTA IMPERDÍVEL!\n\n${nome}\n\n💰 De: R$${precoAntigo}\n💥 Por apenas: R$${preco}\n\nEconomize R$${(precoAntigo - preco).toFixed(2)}!\n\n🛒 Compre agora: ${linkAfiliado}`
+            template: `🔥 OFERTA IMPERDÍVEL!\n\n> ${nome}\n\n💰 ~De: R$${precoAntigo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}~\n💥 *Por apenas: R$${preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*\n\nEconomize R$${(precoAntigo - preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}!\n\n🛒 \`Compre agora pelo link abaixo:\`\n\nLink: ${linkAfiliado}`
         };
 
         try {
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const precoAtual = product.preco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const economia = (product.precoAntigo - product.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            const template = `🔥 OFERTA IMPERDÍVEL!\n\n${product.nome}\n\n💰 De: ${precoAntigo}\n💥 Por apenas: ${precoAtual}\n\nEconomize ${economia}!\n\n🛒 Compre agora pelo link abaixo:\n\nLink: ${product.link_afiliado}`;
+            const template = `🔥 OFERTA IMPERDÍVEL!\n\n> ${product.nome}\n\n💰 ~De: ${precoAntigo}~\n💥 *Por apenas: ${precoAtual}*\n\nEconomize ${economia}!\n\n🛒 \`Compre agora pelo link abaixo:\`\n\nLink: ${product.link_afiliado}`;
 
             return `
                 <div class="product-item">
