@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('productForm');
-    const productList = document.getElementById('productList');
     const formSection = document.getElementById('formSection');
     const marketplaceSection = document.getElementById('marketplaceSection');
     const searchBar = document.getElementById('searchBar');
     const sortFilter = document.getElementById('sortFilter');
+    const categoriesContainer = document.getElementById('categoriesContainer');
     const feedbackMessage = document.getElementById('feedbackMessage'); // Mensagem de feedback
     const serverUrl = 'https://projetohunterback.onrender.com';
 
@@ -90,12 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Exibir a lista de produtos organizados por categoria
     function renderProducts(filteredProducts) {
         if (filteredProducts.length === 0) {
-            productList.innerHTML = '<p>Nenhum produto encontrado.</p>';
+            categoriesContainer.innerHTML = '<p>Nenhum produto encontrado.</p>';
             return;
         }
 
         const categories = [...new Set(filteredProducts.map(product => product.categoria))];
-        productList.innerHTML = categories.map(category => {
+        categoriesContainer.innerHTML = categories.map(category => {
             const categoryProducts = filteredProducts.filter(product => product.categoria === category);
             return `
                 <div class="category">
